@@ -80,7 +80,7 @@ protected:
                 }
 
                 boost::asio::streambuf::const_buffers_type bufs = data->data();
-                std::string dataAsString(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + n);
+                std::string dataAsString(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + std::ptrdiff_t(n));
 
                 auto headers(std::make_shared<std::unordered_map<std::string, std::string>>(self->_httpParser.parseHeader(dataAsString, true)));
 
@@ -97,7 +97,7 @@ protected:
                     boost::asio::async_write(
                             self->_socket,
                             boost::asio::buffer(answer),
-                            [](const boost::system::error_code& e, size_t n) { });
+                            [](const boost::system::error_code &, size_t) { });
                     return;
                 }
 
@@ -114,14 +114,14 @@ protected:
             boost::asio::async_read(_socket,
                                     *data,
                                     boost::asio::transfer_exactly(size - data->size()),
-                                    [self, data, size, headers](const boost::system::error_code& e, size_t n) {
+                                    [self, data, size, headers](const boost::system::error_code& e, size_t) {
                 if (e) {
                     std::cout << "error in HttpServer::Connection#_readBody: " << e << std::endl;
                     return;
                 }
 
                 boost::asio::streambuf::const_buffers_type bufs = data->data();
-                std::string dataAsString(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + size);
+                std::string dataAsString(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + std::ptrdiff_t(size));
 
                 std::string answer;
                 try {
@@ -133,7 +133,7 @@ protected:
                 boost::asio::async_write(
                         self->_socket,
                         boost::asio::buffer(answer),
-                        [](const boost::system::error_code& e, size_t n) { });
+                        [](const boost::system::error_code &, size_t) { });
 
                 self->_socket.close();
             });
